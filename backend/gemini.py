@@ -4,8 +4,8 @@ import os
 # Configure Gemini using environment variable
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-# Use supported model
-model = genai.GenerativeModel("gemini-1.5-flash")
+# ✅ USE FULL MODEL NAME (THIS IS THE FIX)
+model = genai.GenerativeModel("models/gemini-1.0-pro")
 
 def analyze_resume(text):
     prompt = f"""
@@ -18,5 +18,6 @@ def analyze_resume(text):
     Resume:
     {text}
     """
+
     response = model.generate_content(prompt)
     return response.text

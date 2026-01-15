@@ -7,10 +7,16 @@
 <body>
   <div class="card">
     <h1>AI Placement Analyzer</h1>
-    <input type="file" id="resume">
-    <button onclick="analyze()">Analyze Resume</button>
+
+    <!-- Accept only PDF files -->
+    <input type="file" id="resume" accept=".pdf">
+
+    <!-- IMPORTANT: type="button" prevents form submission -->
+    <button type="button" onclick="analyze()">Analyze Resume</button>
+
     <pre id="output"></pre>
   </div>
-<script src="script.js"></script>
+
+  <script src="script.js"></script>
 </body>
 </html>

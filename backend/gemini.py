@@ -4,7 +4,8 @@ import os
 # Configure Gemini using environment variable
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-model = genai.GenerativeModel("gemini-pro")
+# Use supported model
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 def analyze_resume(text):
     prompt = f"""

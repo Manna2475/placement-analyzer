@@ -1,7 +1,9 @@
 from google import genai
 import os
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+client = genai.Client(
+    api_key=os.environ.get("GEMINI_API_KEY")
+)
 
 def analyze_resume(text):
     prompt = f"""
@@ -16,7 +18,7 @@ def analyze_resume(text):
     """
 
     response = client.models.generate_content(
-        model="gemini-1.5-flash",
+        model="gemini-1.0-pro",
         contents=prompt
     )
 

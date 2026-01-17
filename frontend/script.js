@@ -23,7 +23,8 @@ async function analyze() {
 
     const data = await res.json();
 
-    if (!res.ok) {
+    // 🔴 THIS IS THE IMPORTANT PART
+    if (!data.success) {
       output.innerText = data.error || "Analysis failed.";
       return;
     }

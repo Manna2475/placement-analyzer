@@ -1,9 +1,10 @@
-from google import genai
+import google.generativeai as genai
 import os
 
-client = genai.Client(
-    api_key=os.environ.get("GEMINI_API_KEY")
-)
+# Configure Gemini
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+
+model = genai.GenerativeModel("gemini-pro")
 
 def analyze_resume(text):
     prompt = f"""
@@ -14,12 +15,8 @@ def analyze_resume(text):
     4. Give placement readiness score (0-100)
 
     Resume:
-    {text}
+    {text[:3000]}
     """
 
-    response = client.models.generate_content(
-        model="gemini-1.0-pro",
-        contents=prompt
-    )
-
+    response = model.generate_content(prompt)
     return response.text

@@ -2,7 +2,6 @@ async function analyze() {
   const fileInput = document.getElementById("resume");
   const output = document.getElementById("output");
 
-  // Safety check
   if (!fileInput.files.length) {
     output.innerText = "Please upload a resume PDF first.";
     return;
@@ -23,6 +22,12 @@ async function analyze() {
     );
 
     const data = await res.json();
+
+    if (!res.ok) {
+      output.innerText = data.error || "Analysis failed.";
+      return;
+    }
+
     output.innerText = data.result;
 
   } catch (error) {

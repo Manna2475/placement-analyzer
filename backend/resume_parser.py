@@ -3,6 +3,10 @@ import PyPDF2
 def extract_text(pdf_file):
     reader = PyPDF2.PdfReader(pdf_file)
     text = ""
+
     for page in reader.pages:
-        text += page.extract_text()
-    return text
+        page_text = page.extract_text()
+        if page_text:
+            text += page_text
+
+    return text.strip()

@@ -6,6 +6,10 @@ from gemini import analyze_resume
 app = Flask(__name__)
 CORS(app)
 
+@app.route("/", methods=["GET"])
+def home():
+    return "Backend is running"
+
 @app.route("/analyze", methods=["POST"])
 def analyze():
     file = request.files["resume"]

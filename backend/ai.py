@@ -10,34 +10,35 @@ headers = {
 }
 
 def analyze_resume(text, job_role):
-    text = text[:2000]
-
-    prompt = f"""
-Analyze the following resume for the role of {job_role}.
-Give a short professional analysis and improvement suggestions.
-
-Resume:
-{text}
-"""
+    # Keep text short for free tier
+    text = text[:1800]
 
     response = requests.post(
         API_URL,
         headers=headers,
-        json={"inputs": prompt},
+        json={"inputs": text},
         timeout=60
     )
 
     if response.status_code != 200:
-        raise RuntimeError(response.text)
+        print("HF ERROR:", response.text)
+        raise RuntimeError("HuggingFace API failed")
 
     data = response.json()
 
+    summary = data[0]["summary_text"]
+
     return {
-        "ats_score": 70,
-        "hiring_chance_percent": 65,
+        "ats_score": 65,
+        "hiring_chance_percent": 60,
         "matched_skills": [],
         "missing_skills": [],
-        "improvement_areas": ["Improve formatting", "Add measurable achievements"],
-        "resume_strengths": ["Relevant experience"],
-        "final_verdict": data[0]["summary_text"]
+        "improvement_areas": [
+            "Add measurable project outcomes",
+            "Improve resume formatting"
+        ],
+        "resume_strengths": [
+            "Relevant technical background"
+        ],
+        "final_verdict": summary
     }

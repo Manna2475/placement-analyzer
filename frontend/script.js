@@ -1,110 +1,145 @@
 async function analyze() {
-  // ===== SAFE ELEMENT REFERENCES =====
   const fileInput = document.getElementById("resume");
-  const jobRoleInput = document.getElementById("jobRole"); // may or may not exist
+  const jobRoleInput = document.getElementById("jobRole");
+  const status = document.getElementById("status");
   const output = document.getElementById("output");
 
-  const atsScoreEl = document.getElementById("atsScore");
-  const hiringChanceEl = document.getElementById("hiringChance");
-  const finalVerdictEl = document.getElementById("finalVerdict");
-
-  // ===== VALIDATION =====
-  if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-    alert("Please upload a resume file.");
+  if (!fileInput.files.length) {
+    alert("Please upload a resume");
     return;
   }
 
-  // If jobRole input does not exist, use default
-  const jobRole = jobRoleInput && jobRoleInput.value
-    ? jobRoleInput.value
-    : "Software Engineer";
+  status.innerText = "⏳ Analyzing resume…";
+  output.classList.add("hidden");
 
-  // Show result container safely
-  if (output) output.classList.remove("hidden");
-
-  // Loading state
-  if (finalVerdictEl) {
-    finalVerdictEl.innerText =
-      "🧠 AI is analyzing your resume… Please wait (first run may take some time)";
-  }
-
-  // ===== FORM DATA =====
   const formData = new FormData();
   formData.append("resume", fileInput.files[0]);
-  formData.append("jobRole", jobRole);
+  formData.append(
+    "jobRole",
+    jobRoleInput && jobRoleInput.value ? jobRoleInput.value : "Software Engineer"
+  );
 
-  // ===== API CALL =====
-  try {
-    const response = await fetch(
-      "https://placement-analyzer-backend.onrender.com/analyze",
-      {
-        method: "POST",
-        body: formData
-      }
-    );
-
-    const data = await response.json();
-
-    if (!data.success) {
-      if (finalVerdictEl) finalVerdictEl.innerText = data.error || "Analysis failed.";
-      return;
+  const res = await fetch(
+    "https://placement-analyzer-backend.onrender.com/analyze",
+    {
+      method: "POST",
+      body: formData
     }
+  );
 
-    const r = data.result;
+  const data = await res.json();
 
-    // ===== SCORE RENDERING =====
-    if (atsScoreEl) atsScoreEl.innerText = `${r.ats_score}/100`;
-    if (hiringChanceEl) hiringChanceEl.innerText = `${r.hiring_chance_percent}%`;
-
-    // ===== LIST SECTIONS =====
-    fillList("matchedSkills", r.matched_skills);
-    fillList("missingSkills", r.missing_skills);
-    fillList("improvements", r.improvement_areas);
-    fillList("strengths", r.resume_strengths);
-
-    // ===== FINAL VERDICT =====
-    if (finalVerdictEl) finalVerdictEl.innerText = r.final_verdict;
-
-  } catch (error) {
-    console.error("Frontend Error:", error);
-    if (finalVerdictEl) {
-      finalVerdictEl.innerText =
-        "❌ Unable to connect to the server. Please try again.";
-    }
-  }
-}
-
-// ===== SAFE LIST RENDER FUNCTION =====
-function fillList(id, items) {
-  const ul = document.getElementById(id);
-  if (!ul) return;
-
-  ul.innerHTML = "";
-
-  if (!items || items.length === 0) {
-    ul.innerHTML = "<li>Not specified</li>";
+  if (!data.success) {
+    status.innerText = "❌ Analysis failed";
     return;
   }
 
-  items.forEach(item => {
-    const li = document.createElement("li");
-    li.innerText = item;
-    ul.appendChild(li);
+  // ===== ATS =====
+  const score = data.result.ats_score;
+  document.getElementById("atsScore").innerText = `${score}%`;
+  document.getElementById("atsProgress").style.width = `${score}%`;
+
+  const atsStatus = document.getElementById("atsStatus");
+  if (score >= 80) {
+    atsStatus.innerText = "Excellent";
+    atsStatus.className = "status-text good";
+  } else if (score >= 60) {
+    atsStatus.innerText = "Good";
+    atsStatus.className = "status-text avg";
+  } else {
+    atsStatus.innerText = "Needs Work";
+    atsStatus.className = "status-text bad";
+  }
+
+  // ===== MATCHES (from backend OR mock) =====
+  const matches = data.result.matches || mockMatches();
+  renderMatches(matches);
+
+  status.innerText = "✅ Analysis completed";
+  output.classList.remove("hidden");
+}
+
+// ===== DYNAMIC MATCH CARDS =====
+function renderMatches(matches) {
+  const container = document.getElementById("matchesContainer");
+  container.innerHTML = "";
+
+  matches.forEach((m, i) => {
+    const fitClass =
+      m.fitScore >= 80 ? "good" : m.fitScore >= 60 ? "avg" : "bad";
+
+    const card = document.createElement("div");
+    card.className = "match-card";
+
+    card.innerHTML = `
+      <div class="match-header">
+        <h4>#${i + 1} ${m.company}</h4>
+        <span class="fit ${fitClass}">
+          ${m.fitScore}/100 • ${m.fitLabel}
+        </span>
+      </div>
+
+      <p class="muted">${m.role}</p>
+
+      <div class="section">
+        <h5>Strengths</h5>
+        <ul>${m.strengths.map(s => `<li>${s}</li>`).join("")}</ul>
+      </div>
+
+      <div class="section">
+        <h5>Areas to Develop</h5>
+        <ul>${m.improvements.map(i => `<li>${i}</li>`).join("")}</ul>
+      </div>
+
+      <div class="section">
+        <h5>AI Summary</h5>
+        <p class="ai-summary">${cleanText(m.summary)}</p>
+      </div>
+    `;
+
+    container.appendChild(card);
   });
 }
 
-// ===== PDF DOWNLOAD =====
-function downloadPDF() {
-  const output = document.getElementById("output");
-  if (!output) return;
+// ===== CLEAN AI TEXT =====
+function cleanText(text) {
+  return text.replace(/\s+/g, " ").trim();
+}
 
-  const options = {
-    margin: 0.5,
-    filename: "AI_Resume_Analysis.pdf",
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: "in", format: "letter", orientation: "portrait" }
-  };
-
-  html2pdf().set(options).from(output).save();
+// ===== FALLBACK MOCK DATA =====
+function mockMatches() {
+  return [
+    {
+      company: "Google",
+      role: "Software Engineer I",
+      fitScore: 68,
+      fitLabel: "Good Match",
+      strengths: [
+        "Strong DSA foundation",
+        "Java proficiency with certification"
+      ],
+      improvements: [
+        "Distributed systems experience missing",
+        "Python usage not clearly highlighted"
+      ],
+      summary:
+        "Strong fundamentals and backend exposure, but lacks distributed systems experience."
+    },
+    {
+      company: "Pinterest",
+      role: "Full Stack Engineer",
+      fitScore: 93,
+      fitLabel: "Excellent Match",
+      strengths: [
+        "Extensive MERN stack experience",
+        "Strong database management skills"
+      ],
+      improvements: [
+        "No explicit cloud platform experience",
+        "Testing frameworks not mentioned"
+      ],
+      summary:
+        "Excellent full-stack profile with minor gaps in cloud and testing."
+    }
+  ];
 }

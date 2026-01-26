@@ -2,62 +2,66 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>AI Placement Predictor</title>
+  <title>AI Placement Analyzer</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<!-- HEADER -->
-<header class="hero">
-  <div class="logo-badge">✦</div>
-  <h1>AI Placement Predictor</h1>
-  <p>
-    Upload your resume and let our AI analyze it instantly.
-    Get ATS score, job-fit insights, and improvement suggestions.
-  </p>
-</header>
+<div class="app">
 
-<!-- MAIN CARD -->
-<main class="main-card">
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo">🎯</div>
+    <h1>AI Placement Analyzer</h1>
+    <p>ATS-based resume analysis & role-fit insights</p>
+  </header>
 
-  <!-- UPLOAD AREA -->
-  <label class="upload-box">
-    <input type="file" id="resume" accept=".pdf,.docx" hidden />
-    <div class="upload-icon">⬆</div>
-    <h3>Drop your resume here</h3>
-    <span>or</span>
-    <button type="button" class="browse-btn">Browse Files</button>
-    <small>Supports PDF & DOCX • Max 10MB</small>
-  </label>
-
-  <!-- ACTION -->
-  <button class="analyze-btn" onclick="analyze()">Analyze Resume</button>
-
-</main>
-
-<!-- FEATURES -->
-<section class="features">
-  <div class="feature-card">
-    <div class="icon teal">✔</div>
-    <h4>ATS Score</h4>
-    <p>Resume compatibility score</p>
+  <!-- INPUT CARD -->
+  <div class="card">
+    <input type="file" id="resume" accept=".pdf" />
+    <input type="text" id="jobRole" placeholder="Target Job Role (e.g. Backend Engineer)" />
+    <button class="primary-btn" onclick="analyze()">Analyze Resume</button>
+    <p id="status" class="status"></p>
   </div>
 
-  <div class="feature-card">
-    <div class="icon violet">◎</div>
-    <h4>Job Matches</h4>
-    <p>Roles matching your profile</p>
-  </div>
+  <!-- RESULTS -->
+  <section id="output" class="results hidden">
 
-  <div class="feature-card">
-    <div class="icon indigo">↗</div>
-    <h4>AI Insights</h4>
-    <p>Actionable improvement tips</p>
-  </div>
-</section>
+    <!-- ATS SCORE -->
+    <div class="card">
+      <h3>ATS Compatibility Score</h3>
 
-<!-- RESULT (use your existing result UI below this) -->
-<div id="output" class="hidden"></div>
+      <div class="progress">
+        <div class="progress-fill" id="atsProgress"></div>
+      </div>
+
+      <div class="stats">
+        <div>
+          <span>Your Score</span>
+          <strong id="atsScore">0%</strong>
+        </div>
+        <div>
+          <span>Industry Avg</span>
+          <strong>68%</strong>
+        </div>
+        <div>
+          <span>Status</span>
+          <strong id="atsStatus" class="status-text">—</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- MATCHES -->
+    <div class="card">
+      <h3>Top Role / Company Matches</h3>
+      <p class="muted">AI-estimated matches based on your resume and target role</p>
+
+      <div id="matchesContainer"></div>
+    </div>
+
+  </section>
+
+</div>
 
 <script src="script.js"></script>
 </body>

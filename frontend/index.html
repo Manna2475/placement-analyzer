@@ -1,72 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>AI Resume Analyzer</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>AI Placement Predictor</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<div class="card">
-  <h1>AI Resume Analyzer</h1>
+<!-- HEADER -->
+<header class="hero">
+  <div class="logo-badge">✦</div>
+  <h1>AI Placement Predictor</h1>
+  <p>
+    Upload your resume and let our AI analyze it instantly.
+    Get ATS score, job-fit insights, and improvement suggestions.
+  </p>
+</header>
 
-  <input type="file" id="resume" accept=".pdf">
-  <input type="text" id="jobRole" placeholder="Target Job Role (e.g. Backend Developer)">
+<!-- MAIN CARD -->
+<main class="main-card">
 
-  <button onclick="analyze()">Analyze Resume</button>
-  <button class="secondary" onclick="downloadPDF()">Download Report</button>
+  <!-- UPLOAD AREA -->
+  <label class="upload-box">
+    <input type="file" id="resume" accept=".pdf,.docx" hidden />
+    <div class="upload-icon">⬆</div>
+    <h3>Drop your resume here</h3>
+    <span>or</span>
+    <button type="button" class="browse-btn">Browse Files</button>
+    <small>Supports PDF & DOCX • Max 10MB</small>
+  </label>
 
-  <!-- RESULT -->
-  <div id="output" class="result hidden">
+  <!-- ACTION -->
+  <button class="analyze-btn" onclick="analyze()">Analyze Resume</button>
 
-    <!-- SCORES -->
-    <div class="score-row">
-      <div class="score-card">
-        <span>ATS Score</span>
-        <h2 id="atsScore">0</h2>
-      </div>
-      <div class="score-card green">
-        <span>Hiring Chance</span>
-        <h2 id="hiringChance">0%</h2>
-      </div>
-    </div>
+</main>
 
-    <!-- SKILLS -->
-    <div class="grid">
-      <div class="box">
-        <h3>✅ Matched Skills</h3>
-        <ul id="matchedSkills"></ul>
-      </div>
-
-      <div class="box">
-        <h3>❌ Missing Skills</h3>
-        <ul id="missingSkills"></ul>
-      </div>
-    </div>
-
-    <!-- IMPROVEMENTS -->
-    <div class="box">
-      <h3>📈 Areas to Improve</h3>
-      <ul id="improvements"></ul>
-    </div>
-
-    <!-- STRENGTHS -->
-    <div class="box">
-      <h3>💪 Strengths</h3>
-      <ul id="strengths"></ul>
-    </div>
-
-    <!-- VERDICT -->
-    <div class="verdict-box">
-      <h3>🧠 Final Verdict</h3>
-      <p id="finalVerdict"></p>
-    </div>
-
+<!-- FEATURES -->
+<section class="features">
+  <div class="feature-card">
+    <div class="icon teal">✔</div>
+    <h4>ATS Score</h4>
+    <p>Resume compatibility score</p>
   </div>
-</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <div class="feature-card">
+    <div class="icon violet">◎</div>
+    <h4>Job Matches</h4>
+    <p>Roles matching your profile</p>
+  </div>
+
+  <div class="feature-card">
+    <div class="icon indigo">↗</div>
+    <h4>AI Insights</h4>
+    <p>Actionable improvement tips</p>
+  </div>
+</section>
+
+<!-- RESULT (use your existing result UI below this) -->
+<div id="output" class="hidden"></div>
+
 <script src="script.js"></script>
-
 </body>
 </html>

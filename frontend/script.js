@@ -1,66 +1,110 @@
 async function analyze() {
+  // ===== SAFE ELEMENT REFERENCES =====
   const fileInput = document.getElementById("resume");
-  const jobRole = document.getElementById("jobRole").value || "Software Engineer";
+  const jobRoleInput = document.getElementById("jobRole"); // may or may not exist
   const output = document.getElementById("output");
 
-  if (!fileInput.files.length) {
-    alert("Please upload a resume PDF");
+  const atsScoreEl = document.getElementById("atsScore");
+  const hiringChanceEl = document.getElementById("hiringChance");
+  const finalVerdictEl = document.getElementById("finalVerdict");
+
+  // ===== VALIDATION =====
+  if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+    alert("Please upload a resume file.");
     return;
   }
 
-  output.classList.remove("hidden");
-  document.getElementById("finalVerdict").innerText =
-    "🧠 Analyzing resume… please wait";
+  // If jobRole input does not exist, use default
+  const jobRole = jobRoleInput && jobRoleInput.value
+    ? jobRoleInput.value
+    : "Software Engineer";
 
+  // Show result container safely
+  if (output) output.classList.remove("hidden");
+
+  // Loading state
+  if (finalVerdictEl) {
+    finalVerdictEl.innerText =
+      "🧠 AI is analyzing your resume… Please wait (first run may take some time)";
+  }
+
+  // ===== FORM DATA =====
   const formData = new FormData();
   formData.append("resume", fileInput.files[0]);
   formData.append("jobRole", jobRole);
 
+  // ===== API CALL =====
   try {
-    const res = await fetch(
+    const response = await fetch(
       "https://placement-analyzer-backend.onrender.com/analyze",
-      { method: "POST", body: formData }
+      {
+        method: "POST",
+        body: formData
+      }
     );
 
-    const data = await res.json();
+    const data = await response.json();
+
     if (!data.success) {
-      document.getElementById("finalVerdict").innerText = data.error;
+      if (finalVerdictEl) finalVerdictEl.innerText = data.error || "Analysis failed.";
       return;
     }
 
     const r = data.result;
 
-    document.getElementById("atsScore").innerText = r.ats_score;
-    document.getElementById("hiringChance").innerText =
-      r.hiring_chance_percent + "%";
+    // ===== SCORE RENDERING =====
+    if (atsScoreEl) atsScoreEl.innerText = `${r.ats_score}/100`;
+    if (hiringChanceEl) hiringChanceEl.innerText = `${r.hiring_chance_percent}%`;
 
+    // ===== LIST SECTIONS =====
     fillList("matchedSkills", r.matched_skills);
     fillList("missingSkills", r.missing_skills);
     fillList("improvements", r.improvement_areas);
     fillList("strengths", r.resume_strengths);
 
-    document.getElementById("finalVerdict").innerText = r.final_verdict;
+    // ===== FINAL VERDICT =====
+    if (finalVerdictEl) finalVerdictEl.innerText = r.final_verdict;
 
-  } catch (e) {
-    document.getElementById("finalVerdict").innerText =
-      "❌ Server error. Please try again.";
+  } catch (error) {
+    console.error("Frontend Error:", error);
+    if (finalVerdictEl) {
+      finalVerdictEl.innerText =
+        "❌ Unable to connect to the server. Please try again.";
+    }
   }
 }
 
+// ===== SAFE LIST RENDER FUNCTION =====
 function fillList(id, items) {
   const ul = document.getElementById(id);
+  if (!ul) return;
+
   ul.innerHTML = "";
+
   if (!items || items.length === 0) {
     ul.innerHTML = "<li>Not specified</li>";
     return;
   }
-  items.forEach(i => {
+
+  items.forEach(item => {
     const li = document.createElement("li");
-    li.innerText = i;
+    li.innerText = item;
     ul.appendChild(li);
   });
 }
 
+// ===== PDF DOWNLOAD =====
 function downloadPDF() {
-  html2pdf().from(document.getElementById("output")).save("AI_Resume_Report.pdf");
+  const output = document.getElementById("output");
+  if (!output) return;
+
+  const options = {
+    margin: 0.5,
+    filename: "AI_Resume_Analysis.pdf",
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: "in", format: "letter", orientation: "portrait" }
+  };
+
+  html2pdf().set(options).from(output).save();
 }

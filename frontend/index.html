@@ -1,85 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>AI Placement Analyzer</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>AI Resume Analyzer</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="card">
-    <h1>AI Placement Analyzer</h1>
+<div class="card">
+  <h1>AI Resume Analyzer</h1>
 
-    <input type="file" id="resume" accept=".pdf" />
+  <input type="file" id="resume" accept=".pdf">
+  <input type="text" id="jobRole" placeholder="Target Job Role (e.g. Backend Developer)">
 
-    <input
-      type="text"
-      id="jobRole"
-      placeholder="Target Job Role (e.g. Backend Developer)"
-    />
+  <button onclick="analyze()">Analyze Resume</button>
+  <button class="secondary" onclick="downloadPDF()">Download Report</button>
 
-    <button type="button" onclick="analyze()">Analyze Resume</button>
-    <button type="button" onclick="downloadPDF()">Download Report (PDF)</button>
+  <!-- RESULT -->
+  <div id="output" class="result hidden">
 
-    <!-- RESULT -->
-    <div id="output" class="result hidden">
-
-      <!-- SCORES -->
-      <div class="score-box">
-
-        <div class="score-item">
-          <h3>ATS Score</h3>
-          <div class="progress">
-            <div id="atsBar" class="progress-fill"></div>
-          </div>
-          <p id="atsScore">-</p>
-        </div>
-
-        <div class="score-item">
-          <h3>Hiring Chance</h3>
-          <div class="progress">
-            <div id="hiringBar" class="progress-fill green"></div>
-          </div>
-          <p id="hiringChance">-</p>
-        </div>
-
+    <!-- SCORES -->
+    <div class="score-row">
+      <div class="score-card">
+        <span>ATS Score</span>
+        <h2 id="atsScore">0</h2>
       </div>
+      <div class="score-card green">
+        <span>Hiring Chance</span>
+        <h2 id="hiringChance">0%</h2>
+      </div>
+    </div>
 
-      <!-- DETAILS -->
-      <div class="section">
-        <h4>Matched Skills</h4>
+    <!-- SKILLS -->
+    <div class="grid">
+      <div class="box">
+        <h3>✅ Matched Skills</h3>
         <ul id="matchedSkills"></ul>
       </div>
 
-      <div class="section">
-        <h4>Missing / Weak Skills</h4>
+      <div class="box">
+        <h3>❌ Missing Skills</h3>
         <ul id="missingSkills"></ul>
       </div>
-
-      <div class="section">
-        <h4>Areas to Improve</h4>
-        <ul id="improvements"></ul>
-      </div>
-
-      <div class="section">
-        <h4>Strengths</h4>
-        <ul id="strengths"></ul>
-      </div>
-
-      <!-- FINAL VERDICT -->
-      <div class="section verdict">
-        <h4>Final Verdict</h4>
-        <p id="finalVerdict">Waiting for analysis...</p>
-      </div>
-
     </div>
+
+    <!-- IMPROVEMENTS -->
+    <div class="box">
+      <h3>📈 Areas to Improve</h3>
+      <ul id="improvements"></ul>
+    </div>
+
+    <!-- STRENGTHS -->
+    <div class="box">
+      <h3>💪 Strengths</h3>
+      <ul id="strengths"></ul>
+    </div>
+
+    <!-- VERDICT -->
+    <div class="verdict-box">
+      <h3>🧠 Final Verdict</h3>
+      <p id="finalVerdict"></p>
+    </div>
+
   </div>
+</div>
 
-  <!-- PDF Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-  <!-- App Script -->
-  <script src="script.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>

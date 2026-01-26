@@ -3,18 +3,30 @@ async function analyze() {
   const jobRoleInput = document.getElementById("jobRole");
   const output = document.getElementById("output");
 
-  if (!fileInput.files.length) {
+  const atsScoreEl = document.getElementById("atsScore");
+  const hiringChanceEl = document.getElementById("hiringChance");
+  const atsBar = document.getElementById("atsBar");
+  const hiringBar = document.getElementById("hiringBar");
+
+  const finalVerdictEl = document.getElementById("finalVerdict");
+
+  if (!fileInput || !fileInput.files.length) {
     alert("Please upload a resume PDF.");
     return;
   }
 
-  output.classList.remove("hidden");
-  document.getElementById("finalVerdict").innerText =
-    "🧠 AI is analyzing your resume... Please wait";
+  // Show result container
+  if (output) output.classList.remove("hidden");
+
+  // Safe loading message
+  if (finalVerdictEl) {
+    finalVerdictEl.innerText =
+      "🧠 AI is analyzing your resume... Please wait (first run may take 10–15 seconds)";
+  }
 
   const formData = new FormData();
   formData.append("resume", fileInput.files[0]);
-  formData.append("jobRole", jobRoleInput.value || "Software Engineer");
+  formData.append("jobRole", jobRoleInput?.value || "Software Engineer");
 
   try {
     const res = await fetch(
@@ -26,35 +38,43 @@ async function analyze() {
     );
 
     const data = await res.json();
+
     if (!data.success) {
-      document.getElementById("finalVerdict").innerText = data.error;
+      if (finalVerdictEl) finalVerdictEl.innerText = data.error;
       return;
     }
 
     const r = data.result;
 
-    document.getElementById("atsScore").innerText = `${r.ats_score}/100`;
-    document.getElementById("hiringChance").innerText = `${r.hiring_chance_percent}%`;
+    // Scores
+    if (atsScoreEl) atsScoreEl.innerText = `${r.ats_score}/100`;
+    if (hiringChanceEl) hiringChanceEl.innerText = `${r.hiring_chance_percent}%`;
 
-    document.getElementById("atsBar").style.width = `${r.ats_score}%`;
-    document.getElementById("hiringBar").style.width = `${r.hiring_chance_percent}%`;
+    if (atsBar) atsBar.style.width = `${r.ats_score}%`;
+    if (hiringBar) hiringBar.style.width = `${r.hiring_chance_percent}%`;
 
+    // Lists
     fillList("matchedSkills", r.matched_skills);
     fillList("missingSkills", r.missing_skills);
     fillList("improvements", r.improvement_areas);
     fillList("strengths", r.resume_strengths);
 
-    document.getElementById("finalVerdict").innerText = r.final_verdict;
+    // Final verdict
+    if (finalVerdictEl) finalVerdictEl.innerText = r.final_verdict;
 
-  } catch (err) {
-    console.error(err);
-    document.getElementById("finalVerdict").innerText =
-      "❌ Error connecting to backend.";
+  } catch (error) {
+    console.error(error);
+    if (finalVerdictEl) {
+      finalVerdictEl.innerText =
+        "❌ Error connecting to backend. Please try again.";
+    }
   }
 }
 
 function fillList(id, items) {
   const ul = document.getElementById(id);
+  if (!ul) return;
+
   ul.innerHTML = "";
 
   if (!items || items.length === 0) {
@@ -71,14 +91,15 @@ function fillList(id, items) {
 
 function downloadPDF() {
   const element = document.getElementById("output");
+  if (!element) return;
 
-  const opt = {
+  const options = {
     margin: 0.5,
-    filename: 'AI_Resume_Analysis.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
+    filename: "AI_Resume_Analysis.pdf",
+    image: { type: "jpeg", quality: 0.98 },
     html2canvas: { scale: 2 },
-    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    jsPDF: { unit: "in", format: "letter", orientation: "portrait" }
   };
 
-  html2pdf().set(opt).from(element).save();
+  html2pdf().set(options).from(element).save();
 }

@@ -24,16 +24,29 @@ def calculate_ats(text):
     return score, matched, missing
 
 def analyze_resume(text, job_role):
-    text = text[:1800]
+    # HARD LIMIT to avoid HF timeout
+    text = text[:900]
 
-    response = requests.post(
-        API_URL,
-        headers=headers,
-        json={"inputs": text},
-        timeout=60
-    )
+    try:
+        response = requests.post(
+            API_URL,
+            headers=headers,
+            json={"inputs": text},
+            timeout=25
+        )
+    except requests.exceptions.Timeout:
+        return {
+            "ats_score": 0,
+            "hiring_chance_percent": 0,
+            "matched_skills": [],
+            "missing_skills": [],
+            "improvement_areas": ["AI service timed out. Please retry."],
+            "resume_strengths": [],
+            "final_verdict": "AI analysis timed out due to high load. Please try again."
+        }
 
     if response.status_code != 200:
+        print("HF ERROR:", response.text)
         raise RuntimeError("HuggingFace API failed")
 
     summary = response.json()[0]["summary_text"]
@@ -51,8 +64,7 @@ def analyze_resume(text, job_role):
             "Improve resume formatting"
         ],
         "resume_strengths": [
-            "Relevant technical background",
-            "Good academic foundation"
+            "Relevant technical background"
         ],
         "final_verdict": summary
     }
